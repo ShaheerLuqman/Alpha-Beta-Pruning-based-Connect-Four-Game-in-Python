@@ -10,4 +10,5 @@ Customizable Difficulty: Adjust the difficulty level by changing the depth limit
 
 # Requirements
 Python 3.x
+
 Pygame library
