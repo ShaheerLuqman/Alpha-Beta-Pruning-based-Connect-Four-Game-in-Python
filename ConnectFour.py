@@ -1,51 +1,39 @@
-# Importing libraries
-import pygame # For GUI
+import pygame
 import sys
 
-# Defining colours in RGB format
-
-BLACK = (0, 0, 0)       # For displaying text on screen
-GREY = (180, 180, 140)  # For empty disk
-RED = (255, 0, 0)       # For Human move
-BLUE = (0, 0, 255)      # For Background grid
-YELLOW = (255, 240, 0)  # For AI move
-
-# The board had 6 rows and 7 colums
 ROWS = 6
 COLS = 7
-WIN = 4     # Win the game after making line of 4 discs
-
-# Defining window dimensions
-WINDOW_WIDTH = 605
-WINDOW_HEIGHT = 520
-MARGIN = 10
-
-# Defining size of disc and gap between each disk
-DISC_SIZE = 80
-DISC_GAP = 5
-
-# Defining the board dimensions for GUI
-BOARD_WIDTH = COLS * (DISC_SIZE + DISC_GAP) + MARGIN
-BOARD_HEIGHT = ROWS * (DISC_SIZE + DISC_GAP) + MARGIN
+WIN = 4
 
 # Defining symbols for players
 HUMAN = 1
 AI = -1
 EMPTY = 0
 
+BLACK = (0, 0, 0)
+GREY = (238, 237, 237)
+RED = (215, 19, 19)
+BLUE = (0, 121, 255)
+YELLOW = (240, 222, 54)
+
+DISC_SIZE = 80
+DISC_GAP = 5
+MARGIN = 2 * DISC_GAP
+FONT_SIZE = 60
+BOARD_WIDTH = COLS * (DISC_SIZE + DISC_GAP) + MARGIN
+BOARD_HEIGHT = ROWS * (DISC_SIZE + DISC_GAP) + MARGIN
+
 # Initializing alpha and beta values
-INFINITY = float('inf')
+INFINITY = float("inf")
 ALPHA = -INFINITY
 BETA = INFINITY
 
-# Creating window
 pygame.init()
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption('Connect Four')
+window = pygame.display.set_mode((BOARD_WIDTH, BOARD_HEIGHT))
+pygame.display.set_caption("Connect Four")
 clock = pygame.time.Clock()
 
-# Setting font style
-font = pygame.font.SysFont('Arial', 60)
+font = pygame.font.SysFont("Calibri", FONT_SIZE)
 
 # Creating and initializing game board with zeros
 board = []
@@ -56,67 +44,52 @@ for i in range(ROWS):
     board.append(row)
 
 
-# Variable to store the current player
 current_player = HUMAN
+game_state = "running"  # Variable to store the game state (running or over)
+game_result = None  # Variable to store the game result (win, lose, draw or None)
 
-# Variable to store the game state (running or over)
-game_state = 'running'
 
-# Variable to store the game result (win, lose, draw or None)
-game_result = None
-
-# Function to draw the board on the window
 def draw_board():
-    # Fills the window with grey color
     window.fill(GREY)
 
-    # Draws a blue rectangle for the board background
     pygame.draw.rect(window, BLUE, (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
 
     # Loop for drawing colored discs on the board
     for row in range(ROWS):
         for col in range(COLS):
-            # Calculate the position and radius of each disc slot
             x = MARGIN + col * (DISC_SIZE + DISC_GAP) + DISC_SIZE // 2
             y = MARGIN + row * (DISC_SIZE + DISC_GAP) + DISC_SIZE // 2
             r = DISC_SIZE // 2 - DISC_GAP // 2
 
-            # Check the value of the board at the current row and column
             if board[row][col] == HUMAN:
-                # Draws a red circle for the human disc
                 pygame.draw.circle(window, RED, (x, y), r)
             elif board[row][col] == AI:
-                # Draws a yellow circle for the AI disc
                 pygame.draw.circle(window, YELLOW, (x, y), r)
             else:
-                # Draws a grey circle for each disc slot
                 pygame.draw.circle(window, GREY, (x, y), r)
 
     # Check the game state and result
-    if game_state == 'over':
-        # For displaying the game result
-        if game_result == 'win':
-            text = font.render('You win!', True, BLACK)
-        elif game_result == 'lose':
-            text = font.render('You lose!', True, BLACK)
-        elif game_result == 'draw':
-            text = font.render('Draw!', True, BLACK)
+    if game_state == "over":
+        if game_result == "win":
+            text = font.render("You win!", True, BLACK)
+        elif game_result == "lose":
+            text = font.render("You lose!", True, BLACK)
+        elif game_result == "draw":
+            text = font.render("Draw!", True, BLACK)
 
         # Draws the text rectangle and centers it on the window
         text_rect = text.get_rect()
-        text_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+        text_rect.center = (BOARD_WIDTH // 2, BOARD_HEIGHT // 2)
         window.blit(text, text_rect)
 
-# Function to check if the board is full
+
 def is_full():
     for col in range(COLS):
         if board[0][col] == EMPTY:
-            # Return False if there is an empty slot
             return False
-    # Return True if there are no empty slots
     return True
 
-# Function to check if there is a winners
+
 def is_winner(player):
     for row in range(ROWS):
         for col in range(COLS):
@@ -150,7 +123,7 @@ def is_winner(player):
                     if v_count == WIN:
                         return True
 
-                # # Check diagonal win (positive slope)
+                # Check diagonal win (positive slope)
                 if row + WIN <= ROWS and col + WIN <= COLS:
                     # Initialize a counter for diagonal discs
                     d_count = 0
@@ -164,7 +137,7 @@ def is_winner(player):
                     if d_count == WIN:
                         return True
 
-                # # Check diagonal win (negative slope)
+                # Check diagonal win (negative slope)
                 if row - WIN >= -1 and col + WIN <= COLS:
                     # Initialize a counter for diagonal discs
                     d_count = 0
@@ -182,7 +155,10 @@ def is_winner(player):
     # Return False if there is no winner
     return False
 
+
 # Function to generate all possible moves for a given board state and player
+
+
 def generate_moves(board, player):
     # Initialize an empty list to store the moves
     moves = []
@@ -206,7 +182,10 @@ def generate_moves(board, player):
     # Return the list of moves
     return moves
 
+
 # Create a function to evaluate how good a board state is for each player using a scoring heuristic
+
+
 def evaluate(board):
     # Initialize the score to zero
     score = 0
@@ -232,7 +211,7 @@ def evaluate(board):
                     if red_count == 0 and yellow_count > 0:
                         line_value = 10 ** (yellow_count - 1) + 10
                     elif red_count > 0 and yellow_count == 0:
-                        line_value = -10 ** (red_count - 1) + 10
+                        line_value = -(10 ** (red_count - 1)) + 10
                     elif red_count > yellow_count:
                         line_value = 1
                     elif red_count > yellow_count:
@@ -260,7 +239,7 @@ def evaluate(board):
                     if red_count == 0 and yellow_count > 0:
                         line_value = 10 ** (yellow_count - 1) + 10
                     elif red_count > 0 and yellow_count == 0:
-                        line_value = -10 ** (red_count - 1) + 10
+                        line_value = -(10 ** (red_count - 1)) + 10
                     elif red_count > yellow_count:
                         line_value = 1
                     elif red_count > yellow_count:
@@ -271,7 +250,7 @@ def evaluate(board):
                     # Add the line value to the score
                     score += line_value
 
-                 # Check diagonal line (positive slope)
+                # Check diagonal line (positive slope)
                 if row + WIN <= ROWS and col + WIN <= COLS:
                     # Initialize counters for red and blue discs
                     red_count = 0
@@ -288,7 +267,7 @@ def evaluate(board):
                     if red_count == 0 and yellow_count > 0:
                         line_value = 10 ** (yellow_count - 1) + 10
                     elif red_count > 0 and yellow_count == 0:
-                        line_value = -10 ** (red_count - 1) + 10
+                        line_value = -(10 ** (red_count - 1)) + 10
                     elif red_count > yellow_count:
                         line_value = 1
                     elif red_count > yellow_count:
@@ -316,7 +295,7 @@ def evaluate(board):
                     if red_count == 0 and yellow_count > 0:
                         line_value = 10 ** (yellow_count - 1) + 10
                     elif red_count > 0 and yellow_count == 0:
-                        line_value = -10 ** (red_count - 1) + 10
+                        line_value = -(10 ** (red_count - 1)) + 10
                     elif red_count > yellow_count:
                         line_value = 1
                     elif red_count > yellow_count:
@@ -330,7 +309,10 @@ def evaluate(board):
     # Return the score
     return score
 
+
 # Create a function to implement the alpha beta pruning algorithm to find the best move for the AI player
+
+
 def alpha_beta(board, depth, alpha, beta, player):
     # Check if the game is over or the depth limit is reached
     if is_winner(HUMAN) or is_winner(AI) or is_full() or depth == 0:
@@ -395,6 +377,7 @@ def alpha_beta(board, depth, alpha, beta, player):
         # Return the best score and the best move
         return (best_score, best_move)
 
+
 # Create a main loop to run until the user quits
 running = True
 
@@ -410,11 +393,11 @@ while running:
         # Check if the event is a mouse click
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Check if the game state is running and the current player is human
-            if game_state == 'running' and current_player == HUMAN:
+            if game_state == "running" and current_player == HUMAN:
                 # Get the mouse position
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 # Check if the mouse position is within the board area
-                if mouse_x <= BOARD_WIDTH and  mouse_y <= BOARD_HEIGHT:
+                if mouse_x <= BOARD_WIDTH and mouse_y <= BOARD_HEIGHT:
                     # Calculate the column index based on the mouse position
                     col = (mouse_x) // (DISC_SIZE + DISC_GAP)
                     # Check if the top row of the column is empty
@@ -433,20 +416,20 @@ while running:
     # Update game logic
 
     # Check if the game state is running
-    if game_state == 'running':
+    if game_state == "running":
         # Check if there is a winner or the board is full
         if is_winner(HUMAN):
             # Set the game state to over and the game result to win
-            game_state = 'over'
-            game_result = 'win'
+            game_state = "over"
+            game_result = "win"
         elif is_winner(AI):
             # Set the game state to over and the game result to lose
-            game_state = 'over'
-            game_result = 'lose'
+            game_state = "over"
+            game_result = "lose"
         elif is_full():
             # Set the game state to over and the game result to draw
-            game_state = 'over'
-            game_result = 'draw'
+            game_state = "over"
+            game_result = "draw"
         else:
             # Check if the current player is AI
             if current_player == AI:
